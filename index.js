@@ -70,6 +70,7 @@ function animation() {
   player.update();
   enemy.update();
 
+  // Movement logic for player
   if (keys.a.pressed) {
     player.velocity.x = -1;
   } else if (keys.d.pressed) {
@@ -91,6 +92,7 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
+// Stop player from moving when keyup
 window.addEventListener("keyup", (event) => {
   switch (event.key) {
     case "d":
