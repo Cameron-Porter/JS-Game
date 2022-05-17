@@ -1,3 +1,4 @@
+// Grab Canvas from index.html and set properties
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
@@ -7,6 +8,8 @@ canvas.height = 576;
 c.fillRect(0, 0, canvas.width, canvas.height);
 
 const gravity = 0.7;
+
+// Sprite class for base of player and enemy
 class Sprite {
   constructor({ position, velocity }) {
     this.position = position;
@@ -15,11 +18,13 @@ class Sprite {
     this.lastKey;
   }
 
+  // Physically create the sprite
   draw() {
     c.fillStyle = "blue";
     c.fillRect(this.position.x, this.position.y, 50, this.height);
   }
 
+  // Changes made per frame
   update() {
     this.draw();
     this.position.x += this.velocity.x;
@@ -32,6 +37,7 @@ class Sprite {
   }
 }
 
+// Player -----------------
 const player = new Sprite({
   position: {
     x: 200,
@@ -44,6 +50,7 @@ const player = new Sprite({
   height: 150,
 });
 
+// Enemy -----------------
 const enemy = new Sprite({
   position: {
     x: 774,
@@ -56,6 +63,7 @@ const enemy = new Sprite({
   height: 150,
 });
 
+// Tracking keys pressed
 const keys = {
   a: {
     pressed: false,
@@ -99,6 +107,7 @@ function animation() {
 
 animation();
 
+// Listening for which keys are pressed to affect movement
 window.addEventListener("keydown", (event) => {
   switch (event.key) {
     case "d":
