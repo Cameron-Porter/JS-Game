@@ -11,22 +11,50 @@ const gravity = 0.7;
 
 // Sprite class for base of player and enemy
 class Sprite {
-  constructor({ position, velocity }) {
+  constructor({ position, velocity, color = "red", offset }) {
     this.position = position;
     this.velocity = velocity;
+    this.width = 50;
     this.height = 150;
     this.lastKey;
+    this.attackBox = {
+      position: {
+        x: this.position.x,
+        y: this.position.y,
+      },
+      // offset is for the position of the weapon
+      offset,
+      width: 150,
+      height: 25,
+    };
+    this.color = color;
+    this.isAttacking;
   }
 
   // Physically create the sprite
   draw() {
-    c.fillStyle = "blue";
-    c.fillRect(this.position.x, this.position.y, 50, this.height);
+    c.fillStyle = this.color;
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+    // Draw Attack Box
+    if (this.isAttacking) {
+      c.fillStyle = "green";
+      c.fillRect(
+        this.attackBox.position.x,
+        this.attackBox.position.y,
+        this.attackBox.width,
+        this.attackBox.height
+      );
+    }
   }
 
   // Changes made per frame
   update() {
     this.draw();
+    // Sword
+    this.attackBox.position.x = this.position.x + this.attackBox.offset.x;
+    this.attackBox.position.y = this.position.y + this.attackBox.offset.y;
+    //Sprite
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
     if (this.position.y + this.velocity.y + this.height >= canvas.height) {
@@ -34,6 +62,14 @@ class Sprite {
     } else {
       this.velocity.y += gravity;
     }
+  }
+
+  // Displays the sword when sprite attacks then resheathes
+  attack() {
+    this.isAttacking = true;
+    setTimeout(() => {
+      this.isAttacking = false;
+    }, 100);
   }
 }
 
@@ -47,7 +83,11 @@ const player = new Sprite({
     x: 0,
     y: 0,
   },
-  height: 150,
+  offset: {
+    x: 0,
+    y: 35,
+  },
+  color: "blue",
 });
 
 // Enemy -----------------
@@ -60,7 +100,11 @@ const enemy = new Sprite({
     x: 0,
     y: 0,
   },
-  height: 150,
+  offset: {
+    x: -100,
+    y: 35,
+  },
+  color: "orange",
 });
 
 // Tracking keys pressed
@@ -79,6 +123,17 @@ const keys = {
   },
 };
 
+// Detecting if a sprite has been hit with a sword
+function swordCollision({ sword1, sword2 }) {
+  return (
+    sword1.attackBox.position.x + sword1.attackBox.width >= sword2.position.x &&
+    sword1.attackBox.position.x <= sword2.position.x + sword2.width &&
+    sword1.attackBox.position.y + sword1.attackBox.height >=
+      sword2.position.y &&
+    sword1.attackBox.position.y <= sword2.position.y + sword2.height &&
+    sword1.isAttacking
+  );
+}
 function animation() {
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
@@ -102,6 +157,17 @@ function animation() {
     enemy.velocity.x = 5;
   }
 
+  // detect collision from player to enemy
+  if (swordCollision({ sword1: player, sword2: enemy }) && player.isAttacking) {
+    player.isAttacking = false;
+    console.log("hit");
+  }
+  // detect collision from enemy to player
+  if (swordCollision({ sword1: enemy, sword2: player }) && enemy.isAttacking) {
+    enemy.isAttacking = false;
+    console.log("enemy hit");
+  }
+
   window.requestAnimationFrame(animation);
 }
 
@@ -122,6 +188,9 @@ window.addEventListener("keydown", (event) => {
     case "w":
       player.velocity.y = -15;
       break;
+    case "s":
+      player.attack();
+      break;
     case "ArrowRight":
       keys.ArrowRight.pressed = true;
       enemy.lastKey = "ArrowRight";
@@ -132,6 +201,9 @@ window.addEventListener("keydown", (event) => {
       break;
     case "ArrowUp":
       enemy.velocity.y = -15;
+      break;
+    case "ArrowDown":
+      enemy.attack();
       break;
   }
 });
