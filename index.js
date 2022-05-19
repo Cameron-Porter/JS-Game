@@ -109,6 +109,7 @@ animation();
 
 // Listening for which keys are pressed to affect movement
 window.addEventListener("keydown", (event) => {
+  // console.log(event) to find key values
   switch (event.key) {
     case "d":
       keys.d.pressed = true;
